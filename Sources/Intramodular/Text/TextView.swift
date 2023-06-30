@@ -36,6 +36,7 @@ public struct TextView<Label: View>: View {
         var textContentType: UITextContentType?
         #endif
         var dismissKeyboardOnReturn: Bool = false
+        var commitKeyboardOnReturn: Bool = false
         var enablesReturnKeyAutomatically: Bool?
         #if os(iOS) || os(tvOS) || targetEnvironment(macCatalyst)
         var keyboardType: UIKeyboardType = .default
@@ -339,6 +340,16 @@ extension _TextView: UIViewRepresentable {
                         #endif
                     }
                     
+                    return false
+                }
+            }
+            if configuration.commitKeyboardOnReturn {
+                if text == "\n" {
+                    DispatchQueue.main.async {
+                        #if os(iOS)
+                        self.configuration.onCommit()
+                        #endif
+                    }
                     return false
                 }
             }
@@ -738,6 +749,9 @@ extension TextView {
         then({ $0.configuration.dismissKeyboardOnReturn = dismissKeyboardOnReturn })
     }
     
+    public func commitKeyboardOnReturn(_ commitKeyboardOnReturn: Bool) -> Self {
+        then({ $0.configuration.commitKeyboardOnReturn = commitKeyboardOnReturn })
+    }
     public func enablesReturnKeyAutomatically(_ enablesReturnKeyAutomatically: Bool) -> Self {
         then({ $0.configuration.enablesReturnKeyAutomatically = enablesReturnKeyAutomatically })
     }
